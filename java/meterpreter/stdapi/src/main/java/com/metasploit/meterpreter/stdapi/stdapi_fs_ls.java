@@ -7,11 +7,12 @@ import com.metasploit.meterpreter.Meterpreter;
 import com.metasploit.meterpreter.TLVPacket;
 import com.metasploit.meterpreter.TLVType;
 import com.metasploit.meterpreter.command.Command;
+import com.metasploit.meterpreter.command.CommandId;
 
 public class stdapi_fs_ls implements Command {
 
     public int execute(Meterpreter meterpreter, TLVPacket request, TLVPacket response) throws Exception {
-        stdapi_fs_stat statCommand = (stdapi_fs_stat) meterpreter.getCommandManager().getCommand("stdapi_fs_stat");
+        stdapi_fs_stat statCommand = (stdapi_fs_stat) meterpreter.getCommandManager().getCommand(CommandId.STDAPI_FS_STAT);
         String pathString = request.getStringValue(TLVType.TLV_TYPE_DIRECTORY_PATH);
         File path = Loader.expand(pathString);
         if (pathString.contains("*")) {
@@ -20,8 +21,9 @@ public class stdapi_fs_ls implements Command {
             List entries = stdapi_fs_search.findFiles(root, match, false);
             for (int i = 0; i < entries.size(); i++) {
                 String entry = entries.get(i).toString();
-                if (entry.equals(".") || entry.equals(".."))
+                if (entry.equals(".") || entry.equals("..")) {
                     continue;
+                }
                 File f = new File(entry);
                 String pathEntry = entry;
                 if (pathEntry.startsWith(root)) {
@@ -35,8 +37,9 @@ public class stdapi_fs_ls implements Command {
         }
         String[] entries = path.list();
         for (int i = 0; i < entries.length; i++) {
-            if (entries[i].equals(".") || entries[i].equals(".."))
+            if (entries[i].equals(".") || entries[i].equals("..")) {
                 continue;
+            }
             File f = new File(path, entries[i]);
             response.addOverflow(TLVType.TLV_TYPE_FILE_NAME, entries[i]);
             response.addOverflow(TLVType.TLV_TYPE_FILE_PATH, f.getCanonicalPath());
